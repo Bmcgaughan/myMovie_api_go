@@ -1,12 +1,14 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 // make mongo User Model
 
 // User is the model for a user
 type User struct {
-	UserName       string   `json:"username" bson:"username"`
-	Password       string   `json:"password" bson:"password"`
-	FavoriteMovies []string `json:"favoriteMovies" bson:"favoriteMovies"`
+	UserName       string               `json:"username" bson:"username"`
+	Password       string               `json:"password" bson:"password"`
+	FavoriteMovies []primitive.ObjectID `json:"FavoriteMovies" bson:"FavoriteMovies"`
 }
 
 // make mongo Movie Model

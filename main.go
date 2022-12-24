@@ -3,7 +3,6 @@ package main
 import (
 	"api_go/db"
 	"api_go/routes"
-	"context"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -15,8 +14,7 @@ func main() {
 	r.SetTrustedProxies(nil)
 	routes.SetupRoutes(r)
 
-	// Connect to the database
-	client := db.ConnectDB()
-	defer client.Disconnect(context.Background())
+	db.ConnectDB()
+
 	r.Run(":" + port)
 }
