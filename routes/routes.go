@@ -8,8 +8,9 @@ import (
 
 func SetupRoutes(r *gin.Engine) {
 	r.GET("/healthcheck", handlers.HealthCheck)
-	r.GET("/movies", handlers.GetMovies)
-	r.GET("/movies/:title", handlers.GetMovieByTitle)
+	r.GET("/tv", handlers.GetTV)
+	r.GET("/tv/:title", handlers.GetTVByTitle)
+	r.GET("/tv/popular", handlers.GetPopularTV)
 
 	//add to useres favorites
 	r.POST("/users/:username/favorites/:movieID", handlers.AddToFavorites)

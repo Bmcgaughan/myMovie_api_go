@@ -1,6 +1,8 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 // make mongo User Model
 
@@ -15,7 +17,7 @@ type User struct {
 type Movie struct {
 	Title       string   `json:"title" bson:"title"`
 	Description string   `json:"description" bson:"description"`
-	Genre       Genre    `json:"genre" bson:"genre"`
+	Genre       DBGenre  `json:"genre" bson:"genre"`
 	Director    Director `json:"director" bson:"director"`
 	Actors      []string `json:"actors" bson:"actors"`
 	ImagePath   string   `json:"imagePath" bson:"ImagePath"`
@@ -28,7 +30,7 @@ type Movie struct {
 	Recommended []int    `json:"recommended" bson:"recommended"`
 }
 
-type Genre struct {
+type DBGenre struct {
 	Name        string `json:"name" bson:"name"`
 	Description string `json:"description" bson:"description"`
 }
