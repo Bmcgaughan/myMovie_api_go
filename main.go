@@ -11,6 +11,7 @@ import (
 func main() {
 	port := os.Getenv("PORT")
 	r := gin.Default()
+	r.Use(gin.Logger())
 	r.SetTrustedProxies(nil)
 	routes.SetupRoutes(r)
 

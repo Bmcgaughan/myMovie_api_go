@@ -66,7 +66,7 @@ func getActors(cast []Cast) []string {
 	// return first 5 actors or empty actors
 	var actors []string
 	for i, person := range cast {
-		if i > 4 {
+		if i > 2 {
 			break
 		}
 		actors = append(actors, person.Name)

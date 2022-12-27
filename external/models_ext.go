@@ -7,7 +7,7 @@ import (
 
 type Shows struct {
 	Page         int64     `json:"page"`
-	Results      []Results `json:"results"`
+	Result       []Results `json:"results"`
 	TotalPages   int64     `json:"total_pages"`
 	TotalResults int64     `json:"total_results"`
 }
@@ -98,7 +98,7 @@ func (s *Shows) ConvertToMovie() *[]models.Movie {
 	baseURL := "http://image.tmdb.org/t/p/original"
 	var movies []models.Movie
 
-	for _, show := range s.Results {
+	for _, show := range s.Result {
 		details, err := getDetails(show.ID)
 		if err != nil {
 			log.Println("Error getting details for show: ", show.Name)

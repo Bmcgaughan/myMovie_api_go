@@ -4,13 +4,56 @@ import (
 	ext "api_go/external"
 	"api_go/models"
 	"context"
+	"errors"
 	"log"
+	"sort"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+func CreateUser(client *mongo.Client, user models.User) (models.User, error) {
+	collection := client.Database("myFlixDB").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var result bson.M
+	err := collection.FindOne(ctx, bson.M{"Username": user.UserName}).Decode(&result)
+	if err == nil {
+		return user, errors.New("user already exists")
+	}
+
+	if err == mongo.ErrNoDocuments {
+		_, err = collection.InsertOne(ctx, user)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	return user, nil
+}
+
+func GetUser(client *mongo.Client, username string) (models.User, error) {
+	collection := client.Database("myFlixDB").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	var result bson.M
+	err := collection.FindOne(ctx, bson.M{"Username": username}).Decode(&result)
+	if err != nil {
+		log.Println(err)
+		return models.User{}, err
+	}
+
+	user := models.User{
+		UserName: result["Username"].(string),
+		Password: result["Password"].(string),
+	}
+
+	return user, nil
+}
 
 func GetAllTV(client *mongo.Client) ([]models.Movie, error) {
 	collection := client.Database("myFlixDB").Collection("movies")
@@ -78,10 +121,49 @@ func GetPopularTV(client *mongo.Client) (*[]models.Movie, error) {
 		return nil, err
 	}
 
-	addToDB(client, shows)
+	go addToDB(client, shows)
+
+	//sort by popularity
+	sortShows(shows)
 
 	return shows, nil
+}
 
+func GetTrendingTV(client *mongo.Client) (*[]models.Movie, error) {
+	shows, err := ext.GetTrendingTMDB()
+	if err != nil {
+		return nil, err
+	}
+
+	go addToDB(client, shows)
+
+	sortShows(shows)
+
+	return shows, nil
+}
+
+func GetRecommendedTV(client *mongo.Client, id string) (*[]models.Movie, error) {
+	shows, err := ext.GetRecommendedTMDB(id)
+	if err != nil {
+		return nil, err
+	}
+
+	go addToDB(client, shows)
+
+	sortShows(shows)
+
+	return shows, nil
+}
+
+func SearchTV(client *mongo.Client, query string) (*[]models.Movie, error) {
+	shows, err := ext.SearchTMDB(query)
+	if err != nil {
+		return nil, err
+	}
+
+	go addToDB(client, shows)
+
+	return shows, nil
 }
 
 func addToDB(client *mongo.Client, shows *[]models.Movie) {
@@ -102,4 +184,10 @@ func addToDB(client *mongo.Client, shows *[]models.Movie) {
 
 		}
 	}
+}
+
+func sortShows(shows *[]models.Movie) {
+	sort.Slice(*shows, func(i, j int) bool {
+		return (*shows)[i].Popularity > (*shows)[j].Popularity
+	})
 }
