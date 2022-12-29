@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log"
 	"sort"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -143,14 +144,31 @@ func GetTrendingTV(client *mongo.Client) (*[]models.Movie, error) {
 }
 
 func GetRecommendedTV(client *mongo.Client, id string) (*[]models.Movie, error) {
+	// convert id to int
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+	// see if show has recommendations in db
+	existShows, err := getRecommendedFromDB(client, idInt)
+	if err != nil {
+		log.Println("No recommendations in db")
+	}
+
+	if existShows != nil {
+		return existShows, nil
+	}
+
 	shows, err := ext.GetRecommendedTMDB(id)
 	if err != nil {
 		return nil, err
 	}
 
-	go addToDB(client, shows)
-
 	sortShows(shows)
+
+	addToRecommended(client, idInt, shows)
+
+	go addToDB(client, shows)
 
 	return shows, nil
 }
@@ -164,6 +182,54 @@ func SearchTV(client *mongo.Client, query string) (*[]models.Movie, error) {
 	go addToDB(client, shows)
 
 	return shows, nil
+}
+
+func getRecommendedFromDB(client *mongo.Client, id int) (*[]models.Movie, error) {
+	collection := client.Database("myFlixDB").Collection("movies")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	var movie models.Movie
+	// return only Recommended field
+	err := collection.FindOne(ctx, bson.M{"odbID": bson.M{"$eq": id}},
+		options.FindOne().SetProjection(bson.M{"Recommended": 1, "_id": 0})).Decode(&movie)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	// if movie has recommendations get them from db
+	if len(movie.Recommended) > 0 {
+		var shows []models.Movie
+		cursor, err := collection.Find(ctx, bson.M{"odbID": bson.M{"$in": movie.Recommended}})
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		if err = cursor.All(ctx, &shows); err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		sortShows(&shows)
+
+		return &shows, nil
+
+	}
+	return nil, nil
+}
+
+func addToRecommended(client *mongo.Client, show int, shows *[]models.Movie) {
+	var showIDsToAdd []int
+	for _, show := range *shows {
+		showIDsToAdd = append(showIDsToAdd, show.OdbID)
+	}
+	collection := client.Database("myFlixDB").Collection("movies")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	var result bson.M
+	updateErr := collection.FindOneAndUpdate(ctx, bson.M{"odbID": show}, bson.M{"$addToSet": bson.M{"Recommended": bson.M{"$each": showIDsToAdd}}}).Decode(&result)
+	if updateErr != nil {
+		log.Println(updateErr)
+	}
+
 }
 
 func addToDB(client *mongo.Client, shows *[]models.Movie) {

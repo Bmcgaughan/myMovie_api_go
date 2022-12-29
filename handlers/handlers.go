@@ -9,14 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// HealthCheck is a handler for the healthcheck endpoint
+// healthcheck endpoint
 func HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "OK",
 	})
 }
 
-// GetAllTV is a handler for the /movies endpoint
+// /movies endpoint
 func GetTV(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
@@ -35,7 +35,7 @@ func GetTV(c *gin.Context) {
 	c.JSON(http.StatusOK, shows)
 }
 
-// GetMovieByTitle is a handler for the /movies/:title endpoint
+// /movies/:title endpoint
 func GetTVByTitle(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
@@ -56,7 +56,7 @@ func GetTVByTitle(c *gin.Context) {
 	c.JSON(http.StatusOK, show)
 }
 
-// AddToFavorites is a handler for the /users/:username/favorites/:movieID endpoint
+// /users/:username/favorites/:movieID endpoint
 func AddToFavorites(c *gin.Context) {
 	username := c.Param("username")
 	tvID := c.Param("movieID")
@@ -79,7 +79,7 @@ func AddToFavorites(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// RemoveFromFavorites is a handler for the /users/:username/favorites/:movieID endpoint
+// /users/:username/favorites/:movieID endpoint
 func RemoveFromFavorites(c *gin.Context) {
 	username := c.Param("username")
 	tvID := c.Param("movieID")
@@ -102,7 +102,7 @@ func RemoveFromFavorites(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// GetPopularTV is a handler for the /movies/popular endpoint
+// /movies/popular endpoint
 func GetPopularTV(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
@@ -121,7 +121,7 @@ func GetPopularTV(c *gin.Context) {
 	c.JSON(http.StatusOK, shows)
 }
 
-// GetTrendingTV is a handler for the /movies/trending endpoint
+// /movies/trending endpoint
 func GetTrendingTV(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
@@ -140,7 +140,7 @@ func GetTrendingTV(c *gin.Context) {
 	c.JSON(http.StatusOK, shows)
 }
 
-// GetRecommendedTV is a handler for the /movies/recommended/:id endpoint
+// /tv/recommended/:id endpoint
 func GetRecommendedTV(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
@@ -161,7 +161,7 @@ func GetRecommendedTV(c *gin.Context) {
 	c.JSON(http.StatusOK, shows)
 }
 
-// SearchTV is a handler for the /search/:query endpoint
+// /search/:query endpoint
 func SearchTV(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
