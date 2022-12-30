@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"os"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
@@ -20,15 +21,20 @@ type APIConfig struct {
 	JWTSecret     string `mapstructure:"JWT_SECRET"`
 	ImageBase     string `mapstructure:"IMAGE_BASE"`
 	Cost          int    `mapstructure:"COST"`
+	AllowedOrigin string `mapstructure:"ALLOWED_ORIGINS"`
 }
 
 var MainConfig APIConfig
 
 func LoadConfig() {
 	// load .env file from root if exists
-	err := godotenv.Load("settings.env")
-	if err != nil {
-		log.Println("No .env file found")
+
+	if os.Getenv("ENVIRO") == "dev" {
+		log.Println("dev environment")
+		err := godotenv.Load("settings.env")
+		if err != nil {
+			log.Println("No .env file found")
+		}
 	}
 
 	v := viper.New()
@@ -40,9 +46,10 @@ func LoadConfig() {
 	v.BindEnv("JWT_SECRET")
 	v.BindEnv("IMAGE_BASE")
 	v.BindEnv("COST")
+	v.BindEnv("ALLOWED_ORIGINS")
 
 	//load viper into Config struct
-	err = v.Unmarshal(&MainConfig)
+	err := v.Unmarshal(&MainConfig)
 	if err != nil {
 		log.Fatalf("unable to decode into struct, %v", err)
 	}
