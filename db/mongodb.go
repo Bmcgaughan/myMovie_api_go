@@ -1,9 +1,9 @@
 package db
 
 import (
+	"api_go/config"
 	"context"
 	"log"
-	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,7 +14,7 @@ import (
 // ConnectDB connects to the database
 func ConnectDB() *mongo.Client {
 	// Set client options
-	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGODB_URI")))
+	client, err := mongo.NewClient(options.Client().ApplyURI(config.MainConfig.MongoDBURI))
 	if err != nil {
 		log.Fatal(err)
 	}

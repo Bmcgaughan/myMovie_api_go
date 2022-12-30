@@ -4,44 +4,47 @@ import (
 	"log"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/joho/godotenv"
 	viper "github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type APIConfig struct {
-	MongoClient *mongo.Client
-	RedisClient *redis.Client
-	Config      Config
-}
-
-type Config struct {
-	Port          string
-	MongoURI      string
-	RedisURI      string
-	RedisPassword string
-	ImageBase     string
-	Cost          int
-	ApiKey        string
-	JWTSecret     string
+	MongoClient   *mongo.Client
+	RedisClient   *redis.Client
+	Port          string `mapstructure:"PORT"`
+	MongoDBURI    string `mapstructure:"MONGODB_URI"`
+	RedisURI      string `mapstructure:"REDIS_URI"`
+	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
+	APIKey        string `mapstructure:"API_KEY"`
+	JWTSecret     string `mapstructure:"JWT_SECRET"`
+	ImageBase     string `mapstructure:"IMAGE_BASE"`
+	Cost          int    `mapstructure:"COST"`
 }
 
 var MainConfig APIConfig
 
 func LoadConfig() {
-	// load config from env variables and return a Config struct
-	viper.AutomaticEnv()
-
-	viper.SetDefault("port", "8080")
-	viper.SetDefault("mongo_uri", "")
-	viper.SetDefault("redis_uri", "")
-	viper.SetDefault("redis_password", "")
-	viper.SetDefault("image_base", "")
-	viper.SetDefault("cost", 10)
-
-	var config Config
-	err := viper.Unmarshal(&config)
+	// load .env file from root if exists
+	err := godotenv.Load("settings.env")
 	if err != nil {
-		log.Fatalf("Unable to decode into struct, %v", err)
+		log.Println("No .env file found")
+	}
+
+	v := viper.New()
+	v.BindEnv("PORT")
+	v.BindEnv("MONGODB_URI")
+	v.BindEnv("REDIS_URI")
+	v.BindEnv("REDIS_PASSWORD")
+	v.BindEnv("API_KEY")
+	v.BindEnv("JWT_SECRET")
+	v.BindEnv("IMAGE_BASE")
+	v.BindEnv("COST")
+
+	//load viper into Config struct
+	err = v.Unmarshal(&MainConfig)
+	if err != nil {
+		log.Fatalf("unable to decode into struct, %v", err)
 	}
 
 }

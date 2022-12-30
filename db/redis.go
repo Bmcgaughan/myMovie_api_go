@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"os"
 	"time"
 
 	redis "github.com/go-redis/redis/v8"
@@ -18,8 +17,8 @@ const (
 
 func ConnectRedis() *redis.Client {
 	redisClient := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_URL"), // use default Addr
-		Password: os.Getenv("REDIS_PASSWORD"),
+		Addr:     config.MainConfig.RedisURI, // use default Addr
+		Password: config.MainConfig.RedisPassword,
 		DB:       0,
 	})
 

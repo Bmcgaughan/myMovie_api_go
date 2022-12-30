@@ -12,7 +12,7 @@ func main() {
 
 	config.LoadConfig()
 
-	port := config.MainConfig.Config.Port
+	port := config.MainConfig.Port
 	r := gin.Default()
 	r.Use(gin.Logger())
 	r.SetTrustedProxies(nil)
