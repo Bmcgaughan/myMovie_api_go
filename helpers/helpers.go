@@ -11,8 +11,13 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+const (
+	topMovies = 10
 )
 
 func CreateUser(client *mongo.Client, user models.User) (models.User, error) {
@@ -166,11 +171,106 @@ func GetRecommendedTV(client *mongo.Client, id string) (*[]models.Movie, error) 
 
 	sortShows(shows)
 
-	addToRecommended(client, idInt, shows)
+	go addToRecommended(client, idInt, shows)
 
 	go addToDB(client, shows)
 
 	return shows, nil
+}
+
+func GetMostRecommendedTV(client *mongo.Client, username string) (*[]models.Movie, error) {
+	// get users FavoriteMovies from db
+	userFavorites, err := getUserFavorites(client, username)
+	if err != nil || len(*userFavorites) == 0 {
+		log.Println(err)
+		return nil, err
+	}
+
+	collection := client.Database("myFlixDB").Collection("movies")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	cursor, err := collection.Find(ctx, bson.M{"_id": bson.M{"$in": userFavorites}})
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	var movies []models.Movie
+	if err = cursor.All(ctx, &movies); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	// tally up recommendations
+	topMovies, err := tallyRecommended(client, &movies)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return topMovies, nil
+
+}
+
+func tallyRecommended(client *mongo.Client, movies *[]models.Movie) (*[]models.Movie, error) {
+	recommendations := make(map[int]int)
+	for _, movie := range *movies {
+		for _, rec := range movie.Recommended {
+			recommendations[rec]++
+		}
+	}
+
+	// sort recommendation map by value
+	type keyVal struct {
+		Key   int
+		Value int
+	}
+
+	var tallyIds []keyVal
+	for k, v := range recommendations {
+		tallyIds = append(tallyIds, keyVal{k, v})
+	}
+
+	sort.Slice(tallyIds, func(i, j int) bool {
+		return tallyIds[i].Value > tallyIds[j].Value
+	})
+
+	var sortedReco []models.Movie
+	for _, val := range tallyIds {
+		movie, err := getMovieByID(client, val.Key)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		sortedReco = append(sortedReco, movie)
+	}
+
+	return &sortedReco, nil
+
+}
+
+func getMovieByID(client *mongo.Client, id int) (models.Movie, error) {
+	collection := client.Database("myFlixDB").Collection("movies")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	var movie models.Movie
+	err := collection.FindOne(ctx, bson.M{"odbID": id}).Decode(&movie)
+	if err != nil {
+		log.Println(err)
+		return movie, err
+	}
+	return movie, nil
+}
+
+func getUserFavorites(client *mongo.Client, username string) (*[]primitive.ObjectID, error) {
+	collection := client.Database("myFlixDB").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	var user models.User
+	err := collection.FindOne(ctx, bson.M{"Username": username}).Decode(&user)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return &user.FavoriteMovies, nil
 }
 
 func SearchTV(client *mongo.Client, query string) (*[]models.Movie, error) {

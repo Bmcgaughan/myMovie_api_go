@@ -16,7 +16,7 @@ func HealthCheck(c *gin.Context) {
 	})
 }
 
-// /movies endpoint
+// /tv endpoint
 func GetTV(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
@@ -35,7 +35,7 @@ func GetTV(c *gin.Context) {
 	c.JSON(http.StatusOK, shows)
 }
 
-// /movies/:title endpoint
+// /tv/:title endpoint
 func GetTVByTitle(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
@@ -102,7 +102,7 @@ func RemoveFromFavorites(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// /movies/popular endpoint
+// /tv/popular endpoint
 func GetPopularTV(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
@@ -121,7 +121,7 @@ func GetPopularTV(c *gin.Context) {
 	c.JSON(http.StatusOK, shows)
 }
 
-// /movies/trending endpoint
+// /tv/trending endpoint
 func GetTrendingTV(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)
 	if err != nil {
@@ -152,6 +152,25 @@ func GetRecommendedTV(c *gin.Context) {
 	id := c.Param("id")
 
 	shows, err := h.GetRecommendedTV(db.Client, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, shows)
+}
+
+// /tv/foryou endpoint
+func GetTVForYou(c *gin.Context) {
+	username, err := auth.ValidateJWT(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+		return
+	}
+	shows, err := h.GetMostRecommendedTV(db.Client, username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error",
