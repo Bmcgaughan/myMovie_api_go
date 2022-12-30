@@ -11,10 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Client *mongo.Client
-
 // ConnectDB connects to the database
-func ConnectDB() {
+func ConnectDB() *mongo.Client {
 	// Set client options
 	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGODB_URI")))
 	if err != nil {
@@ -26,8 +24,8 @@ func ConnectDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	Client = client
 	log.Println("Connected to MongoDB!")
+	return client
 }
 
 // get collection names from database

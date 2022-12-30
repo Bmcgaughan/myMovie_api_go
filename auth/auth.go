@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"api_go/db"
+	config "api_go/config"
 	h "api_go/helpers"
 	"api_go/models"
 	"errors"
@@ -53,7 +53,7 @@ func CreateUser(c *gin.Context) {
 
 	userModel := models.User{UserName: user.Username, Password: user.Password}
 
-	userCreated, err := h.CreateUser(db.Client, userModel)
+	userCreated, err := h.CreateUser(config.MainConfig.MongoClient, userModel)
 	if err != nil {
 		c.JSON(http.StatusConflict, gin.H{
 			"message": "User already exists",
@@ -73,7 +73,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	userModel, err := h.GetUser(db.Client, user.Username)
+	userModel, err := h.GetUser(config.MainConfig.MongoClient, user.Username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "User not found",

@@ -2,11 +2,18 @@ package handlers
 
 import (
 	"api_go/auth"
+	config "api_go/config"
 	"api_go/db"
 	h "api_go/helpers"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	popularCacheKey  = "popular"
+	trendingCacheKey = "trending"
 )
 
 // healthcheck endpoint
@@ -25,7 +32,7 @@ func GetTV(c *gin.Context) {
 		})
 		return
 	}
-	shows, err := h.GetAllTV(db.Client)
+	shows, err := h.GetAllTV(config.MainConfig.MongoClient)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error",
@@ -46,7 +53,7 @@ func GetTVByTitle(c *gin.Context) {
 	}
 	title := c.Param("title")
 
-	show, err := h.GetTVByTitle(db.Client, title)
+	show, err := h.GetTVByTitle(config.MainConfig.MongoClient, title)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "Movie not found",
@@ -69,7 +76,7 @@ func AddToFavorites(c *gin.Context) {
 		return
 	}
 
-	user, err := h.AddFavorite(db.Client, username, tvID)
+	user, err := h.AddFavorite(config.MainConfig.MongoClient, username, tvID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Error adding movie to favorites",
@@ -92,7 +99,7 @@ func RemoveFromFavorites(c *gin.Context) {
 		return
 	}
 
-	user, err := h.RemoveFavorite(db.Client, username, tvID)
+	user, err := h.RemoveFavorite(config.MainConfig.MongoClient, username, tvID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Error removing movie from favorites",
@@ -111,13 +118,29 @@ func GetPopularTV(c *gin.Context) {
 		})
 		return
 	}
-	shows, err := h.GetPopularTV(db.Client)
+
+	//check redis cache for popular movies and return if exists
+	popularShows, err := db.GetCache(popularCacheKey)
+	if err == nil {
+		log.Println("Cache hit for popular movies")
+		c.JSON(http.StatusOK, popularShows)
+		return
+	}
+
+	shows, err := h.GetPopularTV(config.MainConfig.MongoClient)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error",
 		})
 		return
 	}
+
+	//set popular movies in redis cache
+	err = db.SetCache(popularCacheKey, shows)
+	if err != nil {
+		log.Println("Error setting popular movies in cache")
+	}
+
 	c.JSON(http.StatusOK, shows)
 }
 
@@ -130,13 +153,29 @@ func GetTrendingTV(c *gin.Context) {
 		})
 		return
 	}
-	shows, err := h.GetTrendingTV(db.Client)
+
+	//check redis cache for trending movies and return if exists
+	trendingShows, err := db.GetCache(trendingCacheKey)
+	if err == nil {
+		log.Println("Cache hit for trending movies")
+		c.JSON(http.StatusOK, trendingShows)
+		return
+	}
+
+	shows, err := h.GetTrendingTV(config.MainConfig.MongoClient)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error",
 		})
 		return
 	}
+
+	//set trending movies in redis cache
+	err = db.SetCache(trendingCacheKey, shows)
+	if err != nil {
+		log.Println("Error setting trending movies in cache")
+	}
+
 	c.JSON(http.StatusOK, shows)
 }
 
@@ -151,7 +190,7 @@ func GetRecommendedTV(c *gin.Context) {
 	}
 	id := c.Param("id")
 
-	shows, err := h.GetRecommendedTV(db.Client, id)
+	shows, err := h.GetRecommendedTV(config.MainConfig.MongoClient, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error",
@@ -170,7 +209,7 @@ func GetTVForYou(c *gin.Context) {
 		})
 		return
 	}
-	shows, err := h.GetMostRecommendedTV(db.Client, username)
+	shows, err := h.GetMostRecommendedTV(config.MainConfig.MongoClient, username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error",
@@ -191,7 +230,7 @@ func SearchTV(c *gin.Context) {
 	}
 	query := c.Param("query")
 
-	shows, err := h.SearchTV(db.Client, query)
+	shows, err := h.SearchTV(config.MainConfig.MongoClient, query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Internal Server Error",

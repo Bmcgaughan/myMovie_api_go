@@ -1,21 +1,28 @@
 package main
 
 import (
+	config "api_go/config"
 	"api_go/db"
 	"api_go/routes"
-	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	port := os.Getenv("PORT")
+
+	config.LoadConfig()
+
+	port := config.MainConfig.Config.Port
 	r := gin.Default()
 	r.Use(gin.Logger())
 	r.SetTrustedProxies(nil)
 	routes.SetupRoutes(r)
 
-	db.ConnectDB()
+	mongo := db.ConnectDB()
+	redisClient := db.ConnectRedis()
+
+	config.MainConfig.MongoClient = mongo
+	config.MainConfig.RedisClient = redisClient
 
 	r.Run(":" + port)
 }
