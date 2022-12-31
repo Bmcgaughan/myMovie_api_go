@@ -1,9 +1,0 @@
-  [build]
-  command = "make build"
-  functions = "functions"
-  publish = "."
-
-  [[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/api_go/:splat"
-  status = 200
