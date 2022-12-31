@@ -15,20 +15,20 @@ type User struct {
 
 // make mongo Movie Model
 type Movie struct {
-	ID          primitive.ObjectID `json:"_id" bson:"_id"`
-	Title       string             `json:"title" bson:"title"`
-	Description string             `json:"description" bson:"description"`
-	Genre       DBGenre            `json:"genre" bson:"genre"`
-	Director    Director           `json:"director" bson:"director"`
-	Actors      []string           `json:"actors" bson:"actors"`
-	ImagePath   string             `json:"imagePath" bson:"ImagePath"`
-	Featured    bool               `json:"featured" bson:"featured"`
-	Rating      float64            `json:"rating" bson:"rating"`
-	Network     string             `json:"network" bson:"network"`
-	Popularity  float64            `json:"popularity" bson:"popularity"`
-	Trending    bool               `json:"trending" bson:"trending"`
-	OdbID       int                `json:"odbID" bson:"odbID"`
-	Recommended []int              `json:"recommended" bson:"recommended"`
+	ID          string   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Title       string   `json:"title" bson:"title"`
+	Description string   `json:"description" bson:"description"`
+	Genre       DBGenre  `json:"genre" bson:"genre"`
+	Director    Director `json:"director" bson:"director"`
+	Actors      []string `json:"actors" bson:"actors"`
+	ImagePath   string   `json:"imagePath" bson:"ImagePath"`
+	Featured    bool     `json:"featured" bson:"featured"`
+	Rating      float64  `json:"rating" bson:"rating"`
+	Network     string   `json:"network" bson:"network"`
+	Popularity  float64  `json:"popularity" bson:"popularity"`
+	Trending    bool     `json:"trending" bson:"trending"`
+	OdbID       int      `json:"odbID" bson:"odbID"`
+	Recommended []int    `json:"recommended" bson:"recommended"`
 }
 
 type DBGenre struct {

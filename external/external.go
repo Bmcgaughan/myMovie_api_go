@@ -46,21 +46,26 @@ func GetPopularTMDB() (*[]models.Movie, error) {
 
 // GetTrendingTV returns a list of trending tv shows
 func GetTrendingTMDB() (*[]models.Movie, error) {
-	url := trending + os.Getenv("API_KEY") + language
+	var trendResults = []Results{}
 
-	response, err := http.Get(url)
-	if err != nil {
-		return nil, err
+	for i := 1; i <= pageCount; i++ {
+		url := trending + os.Getenv("API_KEY") + language + page + fmt.Sprint(i)
+		response, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer response.Body.Close()
+
+		var shows Shows
+		err = json.NewDecoder(response.Body).Decode(&shows)
+		if err != nil {
+			return nil, err
+		}
+		trendResults = append(trendResults, shows.Result...)
 	}
-	defer response.Body.Close()
 
-	var shows Shows
-	err = json.NewDecoder(response.Body).Decode(&shows)
-	if err != nil {
-		return nil, err
-	}
-
-	returnShows := shows.ConvertToMovie()
+	processShows := Shows{Result: trendResults}
+	returnShows := processShows.ConvertToMovie()
 
 	return returnShows, nil
 }
@@ -96,7 +101,7 @@ func SearchTMDB(query string) (*[]models.Movie, error) {
 		return nil, err
 	}
 	defer response.Body.Close()
-	
+
 	var shows Shows
 	err = json.NewDecoder(response.Body).Decode(&shows)
 	if err != nil {

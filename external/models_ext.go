@@ -105,6 +105,7 @@ func (s *Shows) ConvertToMovie() *[]models.Movie {
 		}
 
 		parsed := models.Movie{
+			ID:          "",
 			Title:       show.Name,
 			Description: show.Overview,
 			OdbID:       int(show.ID),
