@@ -27,7 +27,7 @@ func main() {
 		gin.SetMode(gin.DebugMode)
 	}
 
-	allowedOrigins := strings.Split(config.MainConfig.AllowedOrigin, ",")
+	allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
 	log.Println(allowedOrigins)
 	log.Println(config.MainConfig)
 	// set cors policy

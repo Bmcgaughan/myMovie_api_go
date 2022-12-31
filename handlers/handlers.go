@@ -219,6 +219,27 @@ func GetTVForYou(c *gin.Context) {
 	c.JSON(http.StatusOK, shows)
 }
 
+func GetUser(c *gin.Context) {
+	username := c.Param("username")
+
+	authedUser, err := auth.ValidateJWT(c)
+	if err != nil || authedUser != username {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	user, err := h.GetUserDetails(config.MainConfig.MongoClient, username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Internal Server Error",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+
 // /search/:query endpoint
 func SearchTV(c *gin.Context) {
 	_, err := auth.ValidateJWT(c)

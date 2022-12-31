@@ -210,6 +210,19 @@ func GetMostRecommendedTV(client *mongo.Client, username string) (*[]models.Movi
 
 }
 
+func GetUserDetails(client *mongo.Client, username string) (models.User, error) {
+	collection := client.Database("myFlixDB").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	var user models.User
+	err := collection.FindOne(ctx, bson.M{"Username": username}).Decode(&user)
+	if err != nil {
+		log.Println(err)
+		return user, err
+	}
+	return user, nil
+}
+
 func tallyRecommended(client *mongo.Client, movies *[]models.Movie) (*[]models.Movie, error) {
 	recommendations := make(map[int]int)
 	for _, movie := range *movies {

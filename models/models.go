@@ -9,7 +9,7 @@ import (
 // User is the model for a user
 type User struct {
 	UserName       string               `json:"Username" bson:"Username"`
-	Password       string               `json:"Uassword" bson:"Password"`
+	Password       string               `json:"Password" bson:"Password"`
 	FavoriteMovies []primitive.ObjectID `json:"FavoriteMovies" bson:"FavoriteMovies"`
 }
 
