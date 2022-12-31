@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -96,6 +95,7 @@ func AddFavorite(client *mongo.Client, username string, movieID string) (models.
 	collection := client.Database("myFlixDB").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
 	var user models.User
 	options := options.FindOneAndUpdate().SetReturnDocument(options.After)
 	// find one and update and return new record
@@ -111,6 +111,7 @@ func RemoveFavorite(client *mongo.Client, username string, movieID string) (mode
 	collection := client.Database("myFlixDB").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
 	var user models.User
 	// find one and update and return new record
 	options := options.FindOneAndUpdate().SetReturnDocument(options.After)
@@ -249,7 +250,7 @@ func tallyRecommended(client *mongo.Client, movies *[]models.Movie) (*[]models.M
 
 	var sortedReco []models.Movie
 	for _, val := range tallyIds {
-		movie, err := getMovieByID(client, val.Key)
+		movie, err := getMovieByODBID(client, val.Key)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -261,7 +262,7 @@ func tallyRecommended(client *mongo.Client, movies *[]models.Movie) (*[]models.M
 
 }
 
-func getMovieByID(client *mongo.Client, id int) (models.Movie, error) {
+func getMovieByODBID(client *mongo.Client, id int) (models.Movie, error) {
 	collection := client.Database("myFlixDB").Collection("movies")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -269,12 +270,12 @@ func getMovieByID(client *mongo.Client, id int) (models.Movie, error) {
 	err := collection.FindOne(ctx, bson.M{"odbID": id}).Decode(&movie)
 	if err != nil {
 		log.Println(err)
-		return movie, err
+		return models.Movie{}, err
 	}
 	return movie, nil
 }
 
-func getUserFavorites(client *mongo.Client, username string) (*[]primitive.ObjectID, error) {
+func getUserFavorites(client *mongo.Client, username string) (*[]string, error) {
 	collection := client.Database("myFlixDB").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
