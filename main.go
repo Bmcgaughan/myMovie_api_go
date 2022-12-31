@@ -4,7 +4,6 @@ import (
 	config "api_go/config"
 	"api_go/db"
 	"api_go/routes"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -28,8 +27,6 @@ func main() {
 	}
 
 	allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
-	log.Println(allowedOrigins)
-	log.Println(config.MainConfig)
 	// set cors policy
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     allowedOrigins,
