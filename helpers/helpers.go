@@ -65,6 +65,7 @@ func GetAllTV(client *mongo.Client) ([]models.Movie, error) {
 	collection := client.Database("myFlixDB").Collection("movies")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+	// return _id in results
 	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
 		log.Println(err)
