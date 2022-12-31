@@ -2,10 +2,8 @@ package config
 
 import (
 	"log"
-	"os"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/joho/godotenv"
 	viper "github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -28,15 +26,6 @@ var MainConfig APIConfig
 
 func LoadConfig() {
 	// load .env file from root if exists
-
-	if os.Getenv("ENVIRO") == "dev" {
-		log.Println("dev environment")
-		err := godotenv.Load("settings.env")
-		if err != nil {
-			log.Println("No .env file found")
-		}
-	}
-
 	v := viper.New()
 	v.BindEnv("PORT")
 	v.BindEnv("MONGODB_URI")
