@@ -275,7 +275,7 @@ func getMovieByODBID(client *mongo.Client, id int) (models.Movie, error) {
 	return movie, nil
 }
 
-func getUserFavorites(client *mongo.Client, username string) (*[]string, error) {
+func getUserFavorites(client *mongo.Client, username string) (*[]int32, error) {
 	collection := client.Database("myFlixDB").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
