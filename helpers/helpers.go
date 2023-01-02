@@ -346,7 +346,7 @@ func addToRecommended(client *mongo.Client, show int, shows *[]models.Movie) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var result bson.M
-	updateErr := collection.FindOneAndUpdate(ctx, bson.M{"obdid": show}, bson.M{"$addToSet": bson.M{"Recommended": bson.M{"$each": showIDsToAdd}}}).Decode(&result)
+	updateErr := collection.FindOneAndUpdate(ctx, bson.M{"odbid": show}, bson.M{"$addToSet": bson.M{"Recommended": bson.M{"$each": showIDsToAdd}}}).Decode(&result)
 	if updateErr != nil {
 		log.Println(updateErr)
 	}
@@ -360,7 +360,7 @@ func addToDB(client *mongo.Client, shows *[]models.Movie) {
 	defer cancel()
 	for _, show := range *shows {
 		var result bson.M
-		err := collection.FindOne(ctx, bson.M{"obdid": show.OdbID}).Decode(&result)
+		err := collection.FindOne(ctx, bson.M{"odbid": show.OdbID}).Decode(&result)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				_, err = collection.InsertOne(ctx, show)
