@@ -108,7 +108,7 @@ func generateToken(user models.User) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["subject"] = user.UserName
-	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 24 * 15).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret))
 }
