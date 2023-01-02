@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -94,7 +95,8 @@ func GetRecommendedTMDB(id string) (*[]models.Movie, error) {
 
 // SearchTMDB returns a list of tv shows based on search query
 func SearchTMDB(query string) (*[]models.Movie, error) {
-	url := fmt.Sprintf("https://api.themoviedb.org/3/search/tv?api_key=%s%s&page=1&query=%s&include_adult=false", os.Getenv("API_KEY"), language, query)
+	uriEncodeQuery := url.QueryEscape(query)
+	url := fmt.Sprintf("https://api.themoviedb.org/3/search/tv?api_key=%s%s&page=1&query=%s&include_adult=false", os.Getenv("API_KEY"), language, uriEncodeQuery)
 
 	response, err := http.Get(url)
 	if err != nil {

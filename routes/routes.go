@@ -15,7 +15,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("/tv/trending", handlers.GetTrendingTV)
 	r.GET("/tv/recommended/:id", handlers.GetRecommendedTV)
 	r.GET("/tv/foryou", handlers.GetTVForYou)
-	r.GET("/search/:query", handlers.SearchTV)
+	r.GET("/tv/search/:query", handlers.SearchTV)
 
 	r.GET("users/:username", handlers.GetUser)
 
