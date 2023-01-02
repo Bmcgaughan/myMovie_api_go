@@ -273,7 +273,7 @@ func getMovieByODBID(client *mongo.Client, id int) (models.Movie, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var movie models.Movie
-	err := collection.FindOne(ctx, bson.M{"odbiD": id}).Decode(&movie)
+	err := collection.FindOne(ctx, bson.M{"odbid": id}).Decode(&movie)
 	if err != nil {
 		log.Println(err)
 		return models.Movie{}, err
