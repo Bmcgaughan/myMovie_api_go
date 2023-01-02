@@ -338,6 +338,9 @@ func getRecommendedFromDB(client *mongo.Client, id int) (*[]models.Movie, error)
 }
 
 func addToRecommended(client *mongo.Client, show int, shows *[]models.Movie) {
+	if len(*shows) == 0 {
+		return
+	}
 	var showIDsToAdd []int
 	for _, show := range *shows {
 		showIDsToAdd = append(showIDsToAdd, show.OdbID)
