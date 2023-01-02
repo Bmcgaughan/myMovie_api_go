@@ -12,15 +12,15 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("/tv", handlers.GetTV)
 	r.GET("/tv/:title", handlers.GetTVByTitle)
 	r.GET("/tv/popular", handlers.GetPopularTV)
-	r.GET("tv/trending", handlers.GetTrendingTV)
-	r.GET("tv/recommended/:id", handlers.GetRecommendedTV)
-	r.GET("tv/foryou", handlers.GetTVForYou)
-	r.GET("search/:query", handlers.SearchTV)
+	r.GET("/tv/trending", handlers.GetTrendingTV)
+	r.GET("/tv/recommended/:id", handlers.GetRecommendedTV)
+	r.GET("/tv/foryou", handlers.GetTVForYou)
+	r.GET("/search/:query", handlers.SearchTV)
 
 	r.GET("users/:username", handlers.GetUser)
 
 	r.POST("/users", auth.CreateUser)
-	r.POST("login", auth.LoginUser)
+	r.POST("/login", auth.LoginUser)
 
 	//add to useres favorites
 	r.POST("/users/:username/favorites/:movieID", handlers.AddToFavorites)

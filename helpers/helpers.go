@@ -197,7 +197,7 @@ func GetMostRecommendedTV(client *mongo.Client, username string) (*[]models.Movi
 	collection := client.Database("myFlixDB").Collection("movies")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	cursor, err := collection.Find(ctx, bson.M{"odbiD": bson.M{"$in": userFavorites}})
+	cursor, err := collection.Find(ctx, bson.M{"odbid": bson.M{"$in": userFavorites}})
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -311,7 +311,7 @@ func getRecommendedFromDB(client *mongo.Client, id int) (*[]models.Movie, error)
 	defer cancel()
 	var movie models.Movie
 	// return only Recommended field
-	err := collection.FindOne(ctx, bson.M{"odbID": bson.M{"$eq": id}},
+	err := collection.FindOne(ctx, bson.M{"odbid": bson.M{"$eq": id}},
 		options.FindOne().SetProjection(bson.M{"recommended": 1, "_id": 0})).Decode(&movie)
 	if err != nil {
 		log.Println(err)
