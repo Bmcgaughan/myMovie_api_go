@@ -28,13 +28,11 @@ func getGenre(ids []int64) models.DBGenre {
 		if name, ok := Genres[id]; ok {
 			return models.DBGenre{
 				Name:        name,
-				Description: "",
 			}
 		}
 	}
 	return models.DBGenre{
 		Name:        "",
-		Description: "",
 	}
 }
 
@@ -52,13 +50,11 @@ func getDirector(crew []Cast) models.Director {
 		if *person.Job == "Director" {
 			return models.Director{
 				Name: person.Name,
-				Bio:  "",
 			}
 		}
 	}
 	return models.Director{
 		Name: "",
-		Bio:  "",
 	}
 }
 

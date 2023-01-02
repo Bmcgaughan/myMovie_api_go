@@ -83,7 +83,7 @@ func GetTVByTitle(client *mongo.Client, title string) (models.Movie, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var movie models.Movie
-	err := collection.FindOne(ctx, bson.M{"Title": title}).Decode(&movie)
+	err := collection.FindOne(ctx, bson.M{"title": title}).Decode(&movie)
 	if err != nil {
 		log.Println(err)
 		return movie, err
@@ -96,10 +96,16 @@ func AddFavorite(client *mongo.Client, username string, movieID string) (models.
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	dbID, convertErr := strconv.Atoi(movieID)
+	if convertErr != nil {
+		log.Println(convertErr)
+		return models.User{}, convertErr
+	}
+
 	var user models.User
 	options := options.FindOneAndUpdate().SetReturnDocument(options.After)
 	// find one and update and return new record
-	err := collection.FindOneAndUpdate(ctx, bson.M{"Username": username}, bson.M{"$addToSet": bson.M{"FavoriteMovies": movieID}}, options).Decode(&user)
+	err := collection.FindOneAndUpdate(ctx, bson.M{"Username": username}, bson.M{"$addToSet": bson.M{"FavoriteMovies": dbID}}, options).Decode(&user)
 	if err != nil {
 		log.Println(err)
 		return user, err
@@ -191,7 +197,7 @@ func GetMostRecommendedTV(client *mongo.Client, username string) (*[]models.Movi
 	collection := client.Database("myFlixDB").Collection("movies")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	cursor, err := collection.Find(ctx, bson.M{"_id": bson.M{"$in": userFavorites}})
+	cursor, err := collection.Find(ctx, bson.M{"odbiD": bson.M{"$in": userFavorites}})
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -267,7 +273,7 @@ func getMovieByODBID(client *mongo.Client, id int) (models.Movie, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var movie models.Movie
-	err := collection.FindOne(ctx, bson.M{"odbID": id}).Decode(&movie)
+	err := collection.FindOne(ctx, bson.M{"odbiD": id}).Decode(&movie)
 	if err != nil {
 		log.Println(err)
 		return models.Movie{}, err
@@ -275,7 +281,7 @@ func getMovieByODBID(client *mongo.Client, id int) (models.Movie, error) {
 	return movie, nil
 }
 
-func getUserFavorites(client *mongo.Client, username string) (*[]int32, error) {
+func getUserFavorites(client *mongo.Client, username string) (*[]int, error) {
 	collection := client.Database("myFlixDB").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -306,7 +312,7 @@ func getRecommendedFromDB(client *mongo.Client, id int) (*[]models.Movie, error)
 	var movie models.Movie
 	// return only Recommended field
 	err := collection.FindOne(ctx, bson.M{"odbID": bson.M{"$eq": id}},
-		options.FindOne().SetProjection(bson.M{"Recommended": 1, "_id": 0})).Decode(&movie)
+		options.FindOne().SetProjection(bson.M{"recommended": 1, "_id": 0})).Decode(&movie)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -314,7 +320,7 @@ func getRecommendedFromDB(client *mongo.Client, id int) (*[]models.Movie, error)
 	// if movie has recommendations get them from db
 	if len(movie.Recommended) > 0 {
 		var shows []models.Movie
-		cursor, err := collection.Find(ctx, bson.M{"odbID": bson.M{"$in": movie.Recommended}})
+		cursor, err := collection.Find(ctx, bson.M{"odbid": bson.M{"$in": movie.Recommended}})
 		if err != nil {
 			log.Println(err)
 			return nil, err
@@ -340,7 +346,7 @@ func addToRecommended(client *mongo.Client, show int, shows *[]models.Movie) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var result bson.M
-	updateErr := collection.FindOneAndUpdate(ctx, bson.M{"odbID": show}, bson.M{"$addToSet": bson.M{"Recommended": bson.M{"$each": showIDsToAdd}}}).Decode(&result)
+	updateErr := collection.FindOneAndUpdate(ctx, bson.M{"obdid": show}, bson.M{"$addToSet": bson.M{"Recommended": bson.M{"$each": showIDsToAdd}}}).Decode(&result)
 	if updateErr != nil {
 		log.Println(updateErr)
 	}
@@ -354,7 +360,7 @@ func addToDB(client *mongo.Client, shows *[]models.Movie) {
 	defer cancel()
 	for _, show := range *shows {
 		var result bson.M
-		err := collection.FindOne(ctx, bson.M{"odbID": show.OdbID}).Decode(&result)
+		err := collection.FindOne(ctx, bson.M{"obdid": show.OdbID}).Decode(&result)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				_, err = collection.InsertOne(ctx, show)
