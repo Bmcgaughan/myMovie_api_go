@@ -34,23 +34,4 @@ func LoadConfig() {
 		ImageBase:     os.Getenv("IMAGE_BASE"),
 		AllowedOrigin: os.Getenv("ALLOWED_ORIGINS"),
 	}
-
-	// load .env file from root if exists
-	// v := viper.New()
-	// v.BindEnv("PORT")
-	// v.BindEnv("MONGODB_URI")
-	// v.BindEnv("REDIS_URI")
-	// v.BindEnv("REDIS_PASSWORD")
-	// v.BindEnv("API_KEY")
-	// v.BindEnv("JWT_SECRET")
-	// v.BindEnv("IMAGE_BASE")
-	// v.BindEnv("COST")
-	// v.BindEnv("ALLOWED_ORIGINS")
-
-	// //load viper into Config struct
-	// err := v.Unmarshal(&MainConfig)
-	// if err != nil {
-	// 	log.Fatalf("unable to decode into struct, %v", err)
-	// }
-
 }

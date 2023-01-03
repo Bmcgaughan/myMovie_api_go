@@ -7,6 +7,7 @@ type User struct {
 	UserName       string `json:"Username" bson:"Username"`
 	Password       string `json:"Password" bson:"Password"`
 	FavoriteMovies []int  `json:"FavoriteMovies" bson:"FavoriteMovies"`
+	LastLogin      string `json:"LastLogin" bson:"LastLogin"`
 }
 
 // make mongo Movie Model
@@ -25,10 +26,11 @@ type Movie struct {
 	Trending    bool     `json:"trending" bson:"trending"`
 	OdbID       int      `json:"odbid" bson:"odbid"`
 	Recommended []int    `json:"recommended" bson:"recommended"`
+	DateAdded   string   `json:"dateadded" bson:"dateadded"`
 }
 
 type DBGenre struct {
-	Name        string `json:"Name" bson:"Name"`
+	Name string `json:"Name" bson:"Name"`
 }
 
 type Director struct {

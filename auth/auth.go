@@ -5,6 +5,7 @@ import (
 	h "api_go/helpers"
 	"api_go/models"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -97,6 +98,12 @@ func LoginUser(c *gin.Context) {
 		})
 		return
 	}
+
+	loginTimeErr := h.LastLogin(config.MainConfig.MongoClient, userModel.UserName)
+	if loginTimeErr != nil {
+		log.Printf("Error adding Login Time to User %s at %s", userModel.UserName, time.Now())
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"user":  userModel,
 		"token": token,
@@ -128,3 +135,4 @@ func ValidateJWT(c *gin.Context) (string, error) {
 	}
 	return token.Claims.(jwt.MapClaims)["subject"].(string), nil
 }
+

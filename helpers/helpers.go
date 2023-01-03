@@ -15,10 +15,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const (
-	topMovies = 10
-)
-
 func CreateUser(client *mongo.Client, user models.User) (models.User, error) {
 	collection := client.Database("myFlixDB").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -305,6 +301,21 @@ func SearchTV(client *mongo.Client, query string) (*[]models.Movie, error) {
 	return shows, nil
 }
 
+func LastLogin(client *mongo.Client, username string) error {
+	loginTime := time.Now()
+	dbTime := loginTime.Format("2006-01-02 15:04:05")
+
+	collection := client.Database("myFlixDB").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	_, err := collection.UpdateOne(ctx, bson.M{"Username": username}, bson.M{"$set": bson.M{"LastLogin": dbTime}})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
 func getRecommendedFromDB(client *mongo.Client, id int) (*[]models.Movie, error) {
 	collection := client.Database("myFlixDB").Collection("movies")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -358,6 +369,7 @@ func addToRecommended(client *mongo.Client, show int, shows *[]models.Movie) {
 
 func addToDB(client *mongo.Client, shows *[]models.Movie) {
 	// add to db if not already there
+	dateAdded := time.Now()
 	collection := client.Database("myFlixDB").Collection("movies")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -366,6 +378,7 @@ func addToDB(client *mongo.Client, shows *[]models.Movie) {
 		err := collection.FindOne(ctx, bson.M{"odbid": show.OdbID}).Decode(&result)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
+				show.DateAdded = dateAdded.Format("2006-01-02 15:04:05")
 				_, err = collection.InsertOne(ctx, show)
 				if err != nil {
 					log.Println(err)
