@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 
 	language  = "&language=en-US"
 	page      = "&page="
-	pageCount = 2
+	pageCount = 3
 	credits   = "&append_to_response=credits"
 )
 
@@ -37,7 +38,12 @@ func GetPopularTMDB() (*[]models.Movie, error) {
 		if err != nil {
 			return nil, err
 		}
-		showResults = append(showResults, shows.Result...)
+		for _, show := range shows.Result {
+			if strings.ToLower(string(show.OriginalLanguage)) != "en" {
+				continue
+			}
+			showResults = append(showResults, show)
+		}
 	}
 	processShows := Shows{Result: showResults}
 	returnShows := processShows.ConvertToMovie()
