@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	redisTTL = 60 * 60 * 24 * 2 // 2 days
+	redisTTL = 60 * 60 * 24 * 1 // 2 days
 )
 
 func ConnectRedis() *redis.Client {
